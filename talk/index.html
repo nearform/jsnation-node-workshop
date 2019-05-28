@@ -65,10 +65,9 @@
   <div>
       streaming a file
       <pre><code class=javascript>
-        const fs = require('fs')
+        const { createReadStream } = require('fs')
 
-        fs
-          .createReadStream(__filename)
+        createReadStream(__filename)
           .pipe(process.stdout)
 
       </code></pre>
@@ -88,10 +87,42 @@
         server.listen(3000)
       </code></pre>
   </div>
+  <div>
+      <em>creating</em> a stream
+      <pre><code class=javascript>
+        const { Transform } = require('stream')
+        
+        const upper = () => new Readable({
+          transform: (chunk, enc, cb) => {
+            cb(null, chunk.toString().toUpperCase())
+          }
+        })
+       
+        module.exports = upper // filename: upper.js
+      </code></pre>
+  </div>
+  <div>
+      <em>safely</em> piping multiple streams while avoiding <em>memory leaks</em>
+      <pre><code class=javascript>
+        const http = require('http')
+        const { createReadStream } = require('fs')
+        const { pipeline } = require('stream')
+        const upper = require('./upper')
+        const rs = () => createReadStream(__filename)
+        const server = http.createServer((req, res) => {
+          pipeline(rs(), upper(), res, (err) => {
+            if (err) console.error(err)
+          })
+        })
+        server.listen(3000)
+    </code></pre>
+  </div>
+  
   <div>it's not really about files. it's about <u><em>data</em></u></div>
   <div>it's not really about streams. it's about <u><em>data chunks</em></u></div>
   <div>streams are <em>event emitters</em></div>
-  <div>readable streams emit <em>data</em> events. these are the <em>chunks</em>.</div>
+  <div>readable streams emit <em><code>data</code></em> events. these are the <em>chunks</em>.</div>
+  <div>streams also emit <em>status</em> events, such as <em><code>error</code></em>, <em><code>end</code></em>, <em><code>close</code></em> & <em><code>finish</code></em></div>
   <div>
       listening to events:
       <pre><code class=javascript>
@@ -122,7 +153,7 @@
       </code></pre>
   </div> 
   <div>
-      <em>copy:</em> creating a event emitter
+      <em>creating</em> an event emitter
       <pre><code class=javascript>
         const { EventEmitter } = require('events')
 
@@ -157,6 +188,19 @@
   </div>
   <div style='text-align:center'><code>setImmediate</code> <br><em>vs</em><br> <code>process.nextTick</code></div>
   <div>
+      current task vs <code>process.nextTick</code> vs <code>setImmediate</code>
+      <pre><code class=javascript>
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+
+        // output: 
+        //   3
+        //   2
+        //   1
+      </code></pre>
+  </div>
+  <div>
       <u><em>scheduling order</em></u>
       <ol>
         <li>current tick</li>
@@ -188,6 +232,50 @@
         <li>promise.then <small>(<em>microtasks</em>)</small></li>
         <li>setImmediate <small>(... next tick)</small>    &nbsp;&nbsp;&nbsp;</li>
       </ol>
+  </div>
+  <div>
+      <em> exercise: </em> run the following
+      <pre><code class=javascript>
+        Promise.reject(Error('problems.'))
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+      </code></pre>
+
+      also try replacing the first line with: 
+      <pre><code class=javascript>
+        Promise.resolve().then(() => { throw Error('problems.') })
+      </code></pre>
+      or even try replacing the first line with:
+      <pre><code class=javascript>
+        (async () => { throw Error('problems. ') })()
+      </code></pre>
+  </div>
+  <div>
+      promises <em>rejections</em> are asynchronous <em>exceptions</em>
+  </div>
+  <div>
+      <em>unhandled</em> exceptions <em>kill</em> the process
+  </div>
+  <div>
+      unhandled  rejections <em>should</em> kill the process
+      but <em> don't anymore </em>
+  </div>
+  <div>
+    <code style='position:relative;top:-1em;font-size:.4em;text-align:center'>node !== browser</code>
+  </div>
+  <div>
+    <pre><code class='sh'>npm install make-promises-safe</code></pre>
+  </div>
+  <div>
+      <em> exercise: </em> run the following
+      <pre><code class=javascript>
+        require('make-promises-safe')
+        Promise.reject(Error('problems.'))
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+      </code></pre>
   </div>
   <div>async/await <em>is</em> promises</div>
   <div>
