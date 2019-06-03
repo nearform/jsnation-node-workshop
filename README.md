@@ -11,8 +11,8 @@ tailor the experience to everyone in attendance.
 Ensure that you have the following installed:
 
 * Node 10.16.0
-  * on Linux/macOs nvm is an easy way to quickly install Node https://github.com/nvm-sh/nvm#install--update-script
-    * Do *not* install node with brew or apt-get.
+  * Do *not* install node with brew or apt-get or as a download from the Node.js website.
+  * on Linux/macOs use nvm as an easy way to quickly install Node https://github.com/nvm-sh/nvm#install--update-script
   * on Windows nvs can be used https://github.com/jasongin/nvs#setup
 * Docker - https://www.docker.com/get-started
 * Docker MongoDB image version 4.1.13
