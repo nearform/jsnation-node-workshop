@@ -26,7 +26,329 @@
   <div>
     <img src='./nearform.svg' width='100'>
   </div>
-  <div>Your presentation goes here</div>
+  <div>
+    <u><em>setup</em></u>
+    <ul>
+      <li>node v10</li>
+      <li>docker</li>
+      <li>mongo db (docker image)</li>
+    </ul>
+  </div>
+  <div><code style='position:relative;top:-1em;font-size:.4em;text-align:center'>node !== browser</code></div>
+  <div>
+    loading a file
+    <pre><code class=javascript>
+      const fs = require('fs')
+
+      console.log(
+        fs.readFileSync(__filename)
+      )
+    </code></pre>
+  </div>
+  <div><em>exercise:</em> load a file</div>
+  <div>
+      creating an http server
+      <pre><code class=javascript>
+        const { createServer } = require('http')
+
+        const server = createServer(
+          (req, res) => {
+            res.end('hello jsnation')
+          }
+        )
+
+        server.listen(3000)
+      </code></pre>
+  </div>
+  <div><em>exercise:</em> serve the file</div>
+  <div><code style='position:relative;top:-1em;font-size:.4em;text-align:center'>event loop</code></div>
+  <div>
+      streaming a file
+      <pre><code class=javascript>
+        const { createReadStream } = require('fs')
+
+        createReadStream(__filename)
+          .pipe(process.stdout)
+
+      </code></pre>
+  </div>
+  <div><em>pro tip</em>: <code>res</code> is a writable stream just like <code>process.stdout</code></div>
+  <div><em>exercise:</em> stream the file over http</div>
+  <div>
+      the answer: streaming a file over http
+      <pre><code class=javascript>
+        const { createReadStream } = require('fs')
+        const http = require('http')
+        const server = http.createServer(
+          (req, res) => {
+            createReadStream(__filename).pipe(res)
+          }
+        )
+        server.listen(3000)
+      </code></pre>
+  </div>
+  <div>
+      <em>creating</em> a stream
+      <pre><code class=javascript>
+        const { Transform } = require('stream')
+        
+        const upper = () => new Readable({
+          transform: (chunk, enc, cb) => {
+            cb(null, chunk.toString().toUpperCase())
+          }
+        })
+       
+        module.exports = upper // filename: upper.js
+      </code></pre>
+  </div>
+  <div>
+      <em>safely</em> piping multiple streams while avoiding <em>memory leaks</em>
+      <pre><code class=javascript>
+        const http = require('http')
+        const { createReadStream } = require('fs')
+        const { pipeline } = require('stream')
+        const upper = require('./upper')
+        const rs = () => createReadStream(__filename)
+        const server = http.createServer((req, res) => {
+          pipeline(rs(), upper(), res, (err) => {
+            if (err) console.error(err)
+          })
+        })
+        server.listen(3000)
+    </code></pre>
+  </div>
+  
+  <div>it's not really about files. it's about <u><em>data</em></u></div>
+  <div>it's not really about streams. it's about <u><em>data chunks</em></u></div>
+  <div>streams are <em>event emitters</em></div>
+  <div>readable streams emit <em><code>data</code></em> events. these are the <em>chunks</em>.</div>
+  <div>streams also emit <em>status</em> events, such as <em><code>error</code></em>, <em><code>end</code></em>, <em><code>close</code></em> & <em><code>finish</code></em></div>
+  <div>
+      listening to events:
+      <pre><code class=javascript>
+        someEmitter.on('data', (data) => {
+          console.log(data)
+        })
+
+        someEmitter.on(
+          'any-event-you-like', 
+          (any, args, you, like) => {
+            console.log('weird flex.')
+          }
+        )
+      </code></pre>
+  </div>
+  <div>
+      emitting events:
+      <pre><code class=javascript>
+        someEmitter.emit('data', 'some data.')
+
+        someEmitter.emit(
+          'any-event-you-like', 
+          'stuff', 
+          'stuff', 
+          'more', 
+          'stuff'
+        )
+      </code></pre>
+  </div> 
+  <div>
+      <em>creating</em> an event emitter
+      <pre><code class=javascript>
+        const { EventEmitter } = require('events')
+
+        function createEmitter () {
+          const ee = new EventEmitter()
+          ee.emit('data', 'some data.')
+          return ee
+        }
+
+        const emitter = createEmitter()
+      </code></pre>
+  </div>
+  <div><em>exercise:</em> listen for the data event on emitter and <code>console.log</code> the data</div>
+  <div><em>problem:</em> can't listen for an event that was already emitted. </div>
+  <div><em>hint:</em> <code>process.nextTick.</code> 5 mins to solve it. </div>
+  <div>
+      <em>answer:</em> use process.nextTick
+      <pre><code class=javascript>
+        const { EventEmitter } = require('events')
+
+        function createEmitter () {
+          const ee = new EventEmitter()
+          process.nextTick(() => {
+            ee.emit('data', 'some data.')
+          })
+          return ee
+        }
+
+        const emitter = createEmitter()
+        emitter.on('data', console.log)
+      </code></pre>
+  </div>
+  <div style='text-align:center'><code>setImmediate</code> <br><em>vs</em><br> <code>process.nextTick</code></div>
+  <div>
+      current task vs <code>process.nextTick</code> vs <code>setImmediate</code>
+      <pre><code class=javascript>
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+
+        // output: 
+        //   3
+        //   2
+        //   1
+      </code></pre>
+  </div>
+  <div>
+      <u><em>scheduling order</em></u>
+      <ol>
+        <li>current tick</li>
+        <li>nextTick <small>(end of current tick)</small></li>
+        <li>setImmediate <small>(... next tick)</small>    &nbsp;&nbsp;&nbsp;</li>
+      </ol>
+  </div>
+  <div>promises & the microtask queue</div>
+  <div>
+      promises resolve in the microtask queue
+      <pre><code class=javascript>
+        Promise.resolve('microtask').then(console.log)
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+
+        // output: 
+        //   3
+        //   2
+        //   microtask
+        //   1
+      </code></pre>
+  </div>
+  <div>
+      <u><em>scheduling order</em></u>
+      <ol>
+        <li>current tick (tasks)</li>
+        <li>nextTick <small>(end of current tick)</small></li>
+        <li>promise.then <small>(<em>microtasks</em>)</small></li>
+        <li>setImmediate <small>(... next tick)</small>    &nbsp;&nbsp;&nbsp;</li>
+      </ol>
+  </div>
+  <div>
+      <em> exercise: </em> run the following
+      <pre><code class=javascript>
+        Promise.reject(Error('problems.'))
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+      </code></pre>
+
+      also try replacing the first line with: 
+      <pre><code class=javascript>
+        Promise.resolve().then(() => { throw Error('problems.') })
+      </code></pre>
+      or even try replacing the first line with:
+      <pre><code class=javascript>
+        (async () => { throw Error('problems. ') })()
+      </code></pre>
+  </div>
+  <div>
+      promises <em>rejections</em> are asynchronous <em>exceptions</em>
+  </div>
+  <div>
+      <em>unhandled</em> exceptions <em>kill</em> the process
+  </div>
+  <div>
+      unhandled  rejections <em>should</em> kill the process
+      but <em> don't anymore </em>
+  </div>
+  <div>
+    <code style='position:relative;top:-1em;font-size:.4em;text-align:center'>node !== browser</code>
+  </div>
+  <div>
+    <pre><code class='sh'>npm install make-promises-safe</code></pre>
+  </div>
+  <div>
+      <em> exercise: </em> run the following
+      <pre><code class=javascript>
+        require('make-promises-safe')
+        Promise.reject(Error('problems.'))
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+      </code></pre>
+  </div>
+  <div>async/await <em>is</em> promises</div>
+  <div>
+      async/await is promises
+      <pre><code class=javascript>
+        const p = async () => 'microtask'
+        const run = async () => {
+          console.log(await p())
+        }
+        run()
+        setImmediate(() => console.log('1'))
+        process.nextTick(() => console.log('2'))
+        console.log('3')
+
+        // output: 
+        //   3
+        //   2
+        //   microtask
+        //   1
+      </code></pre>
+  </div>
+  <div>
+      <u><em>scheduling order</em></u>
+      <ol>
+        <li>current tick (tasks)</li>
+        <li>nextTick <small>(end of current tick)</small></li>
+        <li><em>await</em> <small>(microtasks)</small></li>
+        <li>setImmediate <small>(... next tick)</small>    &nbsp;&nbsp;&nbsp;</li>
+      </ol>
+  </div>
+  <div><em>exercise:</em> async/await</div>
+  <div>
+      <em>exercise:</em> complete to emit the data
+      <pre><code class=javascript>
+        const { EventEmitter } = require('events')
+
+        function createEmitter () {
+          const ee = new EventEmitter()
+          const data = async () => 'some data'
+          const fetch = async () => {}
+          fetch()
+          return ee
+        }
+
+        const emitter = createEmitter()
+        emitter.on('data', console.log)
+
+      </code></pre>
+  </div>
+  <div>
+      <em>answer:</em> <em>await</em> to emit the data
+      <pre><code class=javascript>
+        const { EventEmitter } = require('events')
+
+        function createEmitter () {
+          const ee = new EventEmitter()
+          const data = async () => 'some data'
+          const fetch = async () => {
+            ee.emit('data', await data())
+          }
+          fetch()
+          return ee
+        }
+
+        const emitter = createEmitter()
+        emitter.on('data', console.log)
+      </code></pre>
+  </div>
+  <div> <em>question:</em> why does this <em>matter?</em> </div>
+  <div> <em>answer:</em> it shouldn't. </div>
+  <div> using <em>async/await</em> means we don't have to think about <em>scheduling</em> </div>
+  <div> but <em>abstractions</em> are needed to support building <em>servers</em>... </div>
+  <div> <u>fastify</u> </div>
   <div class="title">
     <div style="height: 30%" class="bubblegum">
       Thanks
