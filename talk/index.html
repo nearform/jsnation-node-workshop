@@ -38,30 +38,30 @@
   <div>
     loading a file
     <pre><code class=javascript>
-      const { readFileSync } = require('fs')
+const { readFileSync } = require('fs')
 
-      console.log(
-        readFileSync(__filename).toString()
-      )
+console.log(
+  readFileSync(__filename).toString()
+)
     </code></pre>
   </div>
   <div><em>exercise:</em> load a file</div>
   <div>
       creating an http server
       <pre><code class=javascript>
-        const { createServer } = require('http')
+const { createServer } = require('http')
 
-        const server = createServer(
-          (req, res) => {
-            res.end('hello jsnation')
-          }
-        )
+const server = createServer(
+  (req, res) => {
+    res.end('hello jsnation')
+  }
+)
 
-        server.listen(3000)
+server.listen(3000)
       </code></pre>
       Check with:
       <pre><code class=bash>
-        $ curl http://localhost:3000
+$ curl http://localhost:3000
       </code></pre>
   </div>
   <div><em>exercise:</em> serve the file</div>
@@ -69,10 +69,10 @@
   <div>
       streaming a file
       <pre><code class=javascript>
-        const { createReadStream } = require('fs')
+const { createReadStream } = require('fs')
 
-        createReadStream(__filename)
-          .pipe(process.stdout)
+createReadStream(__filename)
+  .pipe(process.stdout)
 
       </code></pre>
   </div>
@@ -81,52 +81,52 @@
   <div>
       the answer: streaming a file over http
       <pre><code class=javascript>
-        const { createReadStream } = require('fs')
-        const http = require('http')
-        const server = http.createServer(
-          (req, res) => {
-            createReadStream(__filename).pipe(res)
-          }
-        )
-        server.listen(3000)
+const { createReadStream } = require('fs')
+const http = require('http')
+const server = http.createServer(
+  (req, res) => {
+    createReadStream(__filename).pipe(res)
+  }
+)
+server.listen(3000)
       </code></pre>
       Check with:
       <pre><code class=bash>
-        $ curl http://localhost:3000
+$ curl http://localhost:3000
       </code></pre>
   </div>
   <div>
       <em>creating</em> a stream
       <pre><code class=javascript>
-        const { Transform } = require('stream')
-        
-        const upper = () => new Transform({
-          transform: (chunk, enc, cb) => {
-            cb(null, chunk.toString().toUpperCase())
-          }
-        })
-       
-        module.exports = upper // filename: upper.js
+const { Transform } = require('stream')
+
+const upper = () => new Transform({
+  transform: (chunk, enc, cb) => {
+    cb(null, chunk.toString().toUpperCase())
+  }
+})
+
+module.exports = upper // filename: upper.js
       </code></pre>
   </div>
   <div>
       <em>safely</em> piping multiple streams while avoiding <em>memory leaks</em>
       <pre><code class=javascript>
-        const http = require('http')
-        const { createReadStream } = require('fs')
-        const { pipeline } = require('stream')
-        const upper = require('./upper')
-        const rs = () => createReadStream(__filename)
-        const server = http.createServer((req, res) => {
-          pipeline(rs(), upper(), res, (err) => {
-            if (err) console.error(err)
-          })
-        })
-        server.listen(3000)
+const http = require('http')
+const { createReadStream } = require('fs')
+const { pipeline } = require('stream')
+const upper = require('./upper')
+const rs = () => createReadStream(__filename)
+
+http.createServer((req, res) => {
+  pipeline(rs(), upper(), res, (err) => {
+    if (err) console.error(err)
+  })
+}).listen(3000)
     </code></pre>
     Check with:
     <pre><code class=bash>
-      $ curl http://localhost:3000
+$ curl http://localhost:3000
     </code></pre>
   </div>
   
@@ -138,44 +138,44 @@
   <div>
       listening to events:
       <pre><code class=javascript>
-        someEmitter.on('data', (data) => {
-          console.log(data)
-        })
+someEmitter.on('data', (data) => {
+  console.log(data)
+})
 
-        someEmitter.on(
-          'any-event-you-like', 
-          (any, args, you, like) => {
-            console.log('weird flex.')
-          }
-        )
+someEmitter.on(
+  'any-event-you-like', 
+  (any, args, you, like) => {
+    console.log('weird flex.')
+  }
+)
       </code></pre>
   </div>
   <div>
       emitting events:
       <pre><code class=javascript>
-        someEmitter.emit('data', 'some data.')
+someEmitter.emit('data', 'some data.')
 
-        someEmitter.emit(
-          'any-event-you-like', 
-          'stuff', 
-          'stuff', 
-          'more', 
-          'stuff'
-        )
+someEmitter.emit(
+  'any-event-you-like', 
+  'stuff', 
+  'stuff', 
+  'more', 
+  'stuff'
+)
       </code></pre>
   </div> 
   <div>
       <em>creating</em> an event emitter
       <pre><code class=javascript>
-        const { EventEmitter } = require('events')
+const { EventEmitter } = require('events')
 
-        function createEmitter () {
-          const ee = new EventEmitter()
-          ee.emit('data', 'some data.')
-          return ee
-        }
+function createEmitter () {
+  const ee = new EventEmitter()
+  ee.emit('data', 'some data.')
+  return ee
+}
 
-        const emitter = createEmitter()
+const emitter = createEmitter()
       </code></pre>
   </div>
   <div><em>exercise:</em> listen for the data event on emitter and <code>console.log</code> the data</div>
@@ -184,32 +184,32 @@
   <div>
       <em>answer:</em> use process.nextTick
       <pre><code class=javascript>
-        const { EventEmitter } = require('events')
+const { EventEmitter } = require('events')
 
-        function createEmitter () {
-          const ee = new EventEmitter()
-          process.nextTick(() => {
-            ee.emit('data', 'some data.')
-          })
-          return ee
-        }
+function createEmitter () {
+  const ee = new EventEmitter()
+  process.nextTick(() => {
+    ee.emit('data', 'some data.')
+  })
+  return ee
+}
 
-        const emitter = createEmitter()
-        emitter.on('data', console.log)
+const emitter = createEmitter()
+emitter.on('data', console.log)
       </code></pre>
   </div>
   <div style='text-align:center'><code>setImmediate</code> <br><em>vs</em><br> <code>process.nextTick</code></div>
   <div>
       current task vs <code>process.nextTick</code> vs <code>setImmediate</code>
       <pre><code class=javascript>
-        setImmediate(() => console.log('1'))
-        process.nextTick(() => console.log('2'))
-        console.log('3')
+setImmediate(() => console.log('1'))
+process.nextTick(() => console.log('2'))
+console.log('3')
 
-        // output: 
-        //   3
-        //   2
-        //   1
+// output: 
+//   3
+//   2
+//   1
       </code></pre>
   </div>
   <div>
@@ -224,16 +224,16 @@
   <div>
       promises resolve in the microtask queue
       <pre><code class=javascript>
-        Promise.resolve('microtask').then(console.log)
-        setImmediate(() => console.log('1'))
-        process.nextTick(() => console.log('2'))
-        console.log('3')
+Promise.resolve('microtask').then(console.log)
+setImmediate(() => console.log('1'))
+process.nextTick(() => console.log('2'))
+console.log('3')
 
-        // output: 
-        //   3
-        //   2
-        //   microtask
-        //   1
+// output: 
+//   3
+//   2
+//   microtask
+//   1
       </code></pre>
   </div>
   <div>
@@ -248,19 +248,19 @@
   <div>
       <em> exercise: </em> run the following
       <pre><code class=javascript>
-        Promise.reject(Error('problems.'))
-        setImmediate(() => console.log('1'))
-        process.nextTick(() => console.log('2'))
-        console.log('3')
+Promise.reject(Error('problems.'))
+setImmediate(() => console.log('1'))
+process.nextTick(() => console.log('2'))
+console.log('3')
       </code></pre>
 
       also try replacing the first line with: 
       <pre><code class=javascript>
-        Promise.resolve().then(() => { throw Error('problems.') })
+Promise.resolve().then(() => { throw Error('problems.') })
       </code></pre>
       or even try replacing the first line with:
       <pre><code class=javascript>
-        (async () => { throw Error('problems. ') })()
+(async () => { throw Error('problems. ') })()
       </code></pre>
   </div>
   <div>
@@ -281,15 +281,15 @@
   <div>
       <em> exercise: </em> run the following
       <pre><code class=javascript>
-        require('make-promises-safe') // Use with Node v10
-        Promise.reject(Error('problems.'))
-        setImmediate(() => console.log('1'))
-        process.nextTick(() => console.log('2'))
-        console.log('3')
+require('make-promises-safe') // Use with Node v10
+Promise.reject(Error('problems.'))
+setImmediate(() => console.log('1'))
+process.nextTick(() => console.log('2'))
+console.log('3')
       </code></pre>
       From Node v12.0.0, use the <code>--unhandled-rejections=strict</code> flag:
       <pre><code class=bash>
-        node --unhandled-rejections=strict app.js 
+node --unhandled-rejections=strict app.js 
       </code></pre>
 
   </div>
@@ -297,20 +297,20 @@
   <div>
       async/await is promises
       <pre><code class=javascript>
-        const p = async () => 'microtask'
-        const run = async () => {
-          console.log(await p())
-        }
-        run()
-        setImmediate(() => console.log('1'))
-        process.nextTick(() => console.log('2'))
-        console.log('3')
+const p = async () => 'microtask'
+const run = async () => {
+  console.log(await p())
+}
+run()
+setImmediate(() => console.log('1'))
+process.nextTick(() => console.log('2'))
+console.log('3')
 
-        // output: 
-        //   3
-        //   2
-        //   microtask
-        //   1
+// output: 
+//   3
+//   2
+//   microtask
+//   1
       </code></pre>
   </div>
   <div>
@@ -326,38 +326,38 @@
   <div>
       <em>exercise:</em> complete to emit the data
       <pre><code class=javascript>
-        const { EventEmitter } = require('events')
+const { EventEmitter } = require('events')
 
-        function createEmitter () {
-          const ee = new EventEmitter()
-          const data = async () => 'some data'
-          const fetch = async () => {}
-          fetch()
-          return ee
-        }
+function createEmitter () {
+  const ee = new EventEmitter()
+  const data = async () => 'some data'
+  const fetch = async () => {}
+  fetch()
+  return ee
+}
 
-        const emitter = createEmitter()
-        emitter.on('data', console.log)
+const emitter = createEmitter()
+emitter.on('data', console.log)
 
       </code></pre>
   </div>
   <div>
       <em>answer:</em> <em>await</em> to emit the data
       <pre><code class="javascript">
-        const { EventEmitter } = require('events')
+const { EventEmitter } = require('events')
 
-        function createEmitter () {
-          const ee = new EventEmitter()
-          const data = async () => 'some data'
-          const fetch = async () => {
-            ee.emit('data', await data())
-          }
-          fetch()
-          return ee
-        }
+function createEmitter () {
+  const ee = new EventEmitter()
+  const data = async () => 'some data'
+  const fetch = async () => {
+    ee.emit('data', await data())
+  }
+  fetch()
+  return ee
+}
 
-        const emitter = createEmitter()
-        emitter.on('data', console.log)
+const emitter = createEmitter()
+emitter.on('data', console.log)
       </code></pre>
   </div>
   <div> <em>question:</em> why does this <em>matter?</em> </div>
