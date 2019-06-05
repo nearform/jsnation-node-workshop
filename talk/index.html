@@ -65,6 +65,21 @@ $ curl http://localhost:3000
       </code></pre>
   </div>
   <div><em>exercise:</em> serve the file</div>
+  <div>
+      The <em>wrong</em> way to serve a file
+      <pre><code class=javascript>
+        const { readFileSync } = require('fs')
+        const { createServer } = require('http')
+
+        const server = createServer(
+          (req, res) => {
+            res.end(readFileSync(__filename))
+          }
+        )
+
+        server.listen(3000)
+      </code></pre>
+  </div>
   <div><code style='position:relative;top:-1em;font-size:.4em;text-align:center'>event loop</code></div>
   <div>
       streaming a file
@@ -396,6 +411,9 @@ app.listen(3000).catch(console.error)
       </code></pre>
   </div>
   <div>
+    Validations
+  </em>
+  <div>
     <em>JSON-Schema validations</em> 
     <pre><code class="javascript">
 app.get('/', {
@@ -422,11 +440,6 @@ app.get('/', {
     <pre><code class="javascript">
 const S = require('fluent-schema')
 
-// Require the framework and instantiate it
-const app = require('fastify')({
-  logger: true
-})
-
 app.get('/', {
   schema: {
     querystring: S.object()
@@ -436,9 +449,6 @@ app.get('/', {
 }, async (request, reply) => {
   return { hello: request.query.name }
 })
-
-// Run the server!
-app.listen(3000).catch(console.error)
     </code></pre>
   </div>
   <div>
@@ -447,16 +457,8 @@ app.listen(3000).catch(console.error)
     <pre><code class="javascript">
 const S = require('fluent-schema')
 
-// Require the framework and instantiate it
-const app = require('fastify')({
-  logger: true
-})
-
 app.get('/', {
   schema: {
-    querystring: S.object()
-      .prop('name', S.string().required().default('world'))
-      .valueOf(),
     response: {
       200: S.object()
         .prop('hello', S.string())
@@ -466,19 +468,19 @@ app.get('/', {
 }, async (request, reply) => {
   return { hello: request.query.name, ignored: true }
 })
-
-// Run the server!
-app.listen(3000).catch(console.error)
     </code></pre>
   </div>
   <div>
     <a href="https://npm.im/fast-json-stringify">https://npm.im/fast-json-stringify</a>
   </div>
   <div>
-    How do we write a <em>unit</em> test
+      <em> exercise: </em> add a schema to your route
   </div>
   <div>
-    If we follow certain patterns, <em>any</em> framework <em>works</em>.
+    How do we <em>test</em> a <em>REST</em> server
+  </div>
+  <div>
+    If we follow certain patterns, <em>any</em> <em>test</em> framework <em>works</em>.
   </div>
   <div>
     <em>Problem:</em> we need to programmatically <em>start</em> our application in tests.
@@ -486,16 +488,7 @@ app.listen(3000).catch(console.error)
   <div>
     Currently, <em>our application</em> is a <em>global</em>
   </div>
-  <div><em>exercise:</em> create a factory that return a <em>new</em> instance of the application.</div>
-  <div>
-    <em>Pro tip</em>: using the same file
-    <pre><code class=javascript>
-if (require.main === module) {
-  // This file is the main, run the server!
-  build({ logger: true }).listen(3000).catch(console.error)
-}
-    </code></pre>
-  </div>
+  <div><em>exercise:</em> create a factory that returns a <em>new</em> instance of the application.</div>
   <div>
     <pre><code class=javascript>
 function build (opts) {
@@ -509,6 +502,28 @@ function build (opts) {
 
   return app
 }
+    </code></pre>
+  </div>
+  <div>
+    <em>Pro tip</em>: using the same file
+    <pre><code class=javascript>
+if (require.main === module) {
+  // This file is the main, run the server!
+  build({ logger: true }).listen(3000).catch(console.error)
+}
+    </code></pre>
+  </div>
+  <div>
+    Injecting an http request!
+    <pre><code class=javascript>
+fastify
+  .inject({
+    method: String,
+    url: String,
+    query: Object,
+    body: Object,
+    headers: Object
+  })
     </code></pre>
   </div>
   <div>
@@ -588,13 +603,19 @@ test('hello querystring', async function (t) {
       npm install mongodb
       npm install fastify-mongodb
       npm install mongo-clean --save-dev
+      docker run -p 27017:27017 mongo:4.1.13
     </code></pre>
   </div>
   <div>
     <pre><code class=javascript>
+function build (opts) {
+  const app = fastify(opts)
+
   app.register(require('fastify-mongodb'), {
     url: 'mongodb://localhost/workshop'
   })
+
+  // omitted
     </code></pre>
   </div>
   <div>
@@ -656,16 +677,7 @@ beforeEach(async function () {
     <em>Read</em> one element from <em>Collection</em>
     <pre><code class=javascript>
   app.get('/something/:id', {
-    schema: {
-      params: S.object()
-        .prop('id', S.string())
-        .valueOf(),
-      response: {
-        200: S.object()
-          .prop('name', S.string())
-          .prop('_id', S.string())
-          .valueOf()
-      }
+    // fill it in!
   }, async (request, reply) => {
     const { ObjectId } = app.mongo
     const coll = app.mongo.db.collection('something')
