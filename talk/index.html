@@ -887,6 +887,66 @@ function build (opts) {
     </ol>
     <em>Update</em> package.json accordingly
   </div>
+  <div>
+    Authentication
+  </div>
+  <div>
+    <em>Sample</em> authentication module
+    <pre><code class='sh'>
+      npm install @matteo.collina/fastify-auth-mongo-jwt
+    </code></pre>
+  </div>
+  <div>
+    <pre><code class=javascript>
+function build (opts) {
+  const app = fastify(opts)
+
+  app.register(require('fastify-mongodb'), {
+    url: 'mongodb://localhost/workshop'
+  })
+
+  app.register(require('@matteo.collina/fastify-auth-mongo-jwt'), {
+    auth: {
+      secret: 'thisisalongsecretjustfortests'
+    }
+  })
+    </code></pre>
+  </div>
+  <div>
+    <em>Add</em> a <em>preValidation</em> <em>hook</em> in routes/todo.js
+    <pre><code class=javascript>
+module.exports = async function (app) {
+  app.addHook('preValidation', function (req, reply) {
+    return req.jwtVerify()
+  })
+    </code></pre>
+  </div>
+  <div>
+    All todo <em>tests</em> are <em>RED!</em>
+  </div>
+  <div>
+    Use an <em>utility</em> to <em>create</em> and <em>login</em> a user
+    <pre><code class=javascript>
+const { createUser } = require('@matteo.collina/fastify-auth-mongo-jwt')
+
+let server
+let inject
+
+beforeEach(async function () {
+  server = build()
+  await server.ready()
+  await clean(server.mongo.db)
+  inject = (await createUser(server)).inject
+})
+    </code></pre>
+  </div>
+  <div>
+    Use the new <em>inject</em> function everywhere
+  </div>
+  <div>
+    <em>Test</em> manually using <em>postman</em>!
+    Remember to pass 'Bearer: $YOURTOKEN' as an header
+  </div>
   <div class="title">
     Questions?
   </div>
