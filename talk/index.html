@@ -327,7 +327,7 @@
   </div>
   <div>
       <em>answer:</em> <em>await</em> to emit the data
-      <pre><code class=javascript>
+      <pre><code class="javascript">
         const { EventEmitter } = require('events')
 
         function createEmitter () {
@@ -348,7 +348,224 @@
   <div> <em>answer:</em> it shouldn't. </div>
   <div> using <em>async/await</em> means we don't have to think about <em>scheduling</em> </div>
   <div> but <em>abstractions</em> are needed to support building <em>servers</em>... </div>
-  <div> <u>fastify</u> </div>
+  <div>
+    <img src="./fastify-white-landscape.svg">
+  </div>
+  <div>
+    <a href="https://www.fastify.io/">www.fastify.io</a>
+  </div>
+  <div>
+    <pre><code class="javascript">
+// Require the framework and instantiate it
+const app = require('fastify')({
+  logger: true
+})
+
+// Declare a route
+app.get('/', async (request, reply) => {
+  // request.query contains the parsed querystring
+  return { hello: 'world' }
+})
+
+// Run the server!
+app.listen(3000).catch(console.error)
+      </code></pre>
+  </div>
+  <div>
+      <em> exercise: </em> create an "hello world" route
+
+      <pre><code>
+      GET / -> { "hello": "world" }
+      GET /?name=Matteo -> { "hello": "Matteo" }
+      </code></pre>
+  </div>
+  <div>
+    <em>JSON-Schema validations</em> 
+    <pre><code class="javascript">
+app.get('/', {
+  schema: {
+    querystring: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          default: "world"
+        }
+      },
+      required: ["name"]
+    }
+  }
+}, async (request, reply) => {
+  return { hello: request.query.name }
+})
+    </code></pre>
+  </div>
+  <div>
+    <em>Use the fluent-schema module</em>
+
+    <pre><code class="javascript">
+const S = require('fluent-schema')
+
+// Require the framework and instantiate it
+const app = require('fastify')({
+  logger: true
+})
+
+app.get('/', {
+  schema: {
+    querystring: S.object()
+      .prop('name', S.string().required().default('world'))
+      .valueOf()
+  }
+}, async (request, reply) => {
+  return { hello: request.query.name }
+})
+
+// Run the server!
+app.listen(3000).catch(console.error)
+    </code></pre>
+  </div>
+  <div>
+    <em>Specify the JSON schema of responses</em>
+
+    <pre><code class="javascript">
+const S = require('fluent-schema')
+
+// Require the framework and instantiate it
+const app = require('fastify')({
+  logger: true
+})
+
+app.get('/', {
+  schema: {
+    querystring: S.object()
+      .prop('name', S.string().required().default('world'))
+      .valueOf(),
+    response: {
+      200: S.object()
+        .prop('hello', S.string())
+        .valueOf()
+    }
+  }
+}, async (request, reply) => {
+  return { hello: request.query.name, ignored: true }
+})
+
+// Run the server!
+app.listen(3000).catch(console.error)
+    </code></pre>
+  </div>
+  <div>
+    <a href="https://npm.im/fast-json-stringify">https://npm.im/fast-json-stringify</a>
+  </div>
+  <div>
+    How do we write a <em>unit</em> test
+  </div>
+  <div>
+    If we follow certain patterns, <em>any</em> framework <em>works</em>.
+  </div>
+  <div>
+    <em>Problem:</em> we need to programmatically <em>start</em> our application in tests.
+  </div>
+  <div>
+    Currently, <em>our application</em> is a <em>global</em>
+  </div>
+  <div><em>exercise:</em> create a factory that return a <em>new</em> instance of the application.</div>
+  <div>
+    <em>Pro tip</em>: using the same file
+    <pre><code class=javascript>
+if (require.main === module) {
+  // This file is the main, run the server!
+  build({ logger: true }).listen(3000).catch(console.error)
+}
+    </code></pre>
+  </div>
+  <div>
+    <pre><code class=javascript>
+function build (opts) {
+  const app = fastify(opts)
+
+  app.get('/', {
+    // omitted
+  }, async (request, reply) => {
+    return { hello: request.query.name, ignored: true }
+  })
+
+  return app
+}
+    </code></pre>
+  </div>
+  <div>
+    Fake an http request
+    <pre><code class=javascript>
+require('make-promises-safe')
+const build = require('./server')
+
+async function run () {
+  const app = build()
+
+  const res = await app.inject({
+    url: '/'
+  })
+
+  console.log(JSON.parse(res.body))
+}
+
+run()
+    </code></pre>
+  </div>
+  <div>
+    Our <em>preferred</em> test framework is <a href="https://www.node-tap.org/">www.node-tap.org</a>.
+    But <em>any</em> will do. What's <em>your</em> favorite?
+  </div>
+  <div><em>exercise:</em> write a <em>test</em> for your <em>route</em></div>
+  <div>
+    <pre><code class=javascript>
+'use strict'
+
+const { beforeEach, afterEach, test } = require('tap')
+const build = require('./server')
+
+let server
+
+beforeEach(async function () {
+  server = build()
+  await server.ready()
+})
+
+afterEach(async function () {
+  await server.close()
+})
+    </code></pre>
+  </div>
+  <div>
+    <pre><code class=javascript>
+test('hello world', async function (t) {
+  const res = await server.inject({
+    url: '/'
+  })
+  t.strictDeepEqual(JSON.parse(res.body), {
+    hello: 'world'
+  })
+})
+
+test('hello querystring', async function (t) {
+  const res = await server.inject({
+    url: '/?name=Matteo'
+  })
+  t.strictDeepEqual(JSON.parse(res.body), {
+    hello: 'Matteo'
+  })
+})
+    </code></pre>
+  </div>
+  <div>
+    Using <em>mocks</em> is discouraged.
+  </div>
+  <div>
+    A <em>microservice</em> is a unit. If it includes a <em>database</em>, that
+    <em>must</em> be covered by your unit tests.
+  </div>
   <div class="title">
     <div style="height: 30%" class="bubblegum">
       Thanks
