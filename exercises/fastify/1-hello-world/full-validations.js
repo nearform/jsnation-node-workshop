@@ -6,14 +6,14 @@ const app = require('fastify')({
 app.get('/', {
   schema: {
     querystring: {
-      type: "object",
+      type: 'object',
       properties: {
         name: {
-          type: "string",
-          default: "world"
+          type: 'string',
+          default: 'world'
         }
       },
-      required: ["name"]
+      required: ['name']
     }
   }
 }, async (request, reply) => {

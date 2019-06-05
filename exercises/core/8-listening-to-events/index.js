@@ -7,7 +7,7 @@ someEmitter.on('data', (data) => {
 })
 
 someEmitter.on(
-  'any-event-you-like', 
+  'any-event-you-like',
   (any, args, you, like) => {
     console.log('weird flex.')
   }

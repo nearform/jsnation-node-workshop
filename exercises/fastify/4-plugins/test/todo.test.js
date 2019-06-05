@@ -75,4 +75,3 @@ test('404 todo', async function (t) {
   })
   t.strictEqual(res.statusCode, 404)
 })
-

@@ -33,4 +33,3 @@ test('hello querystring', async function (t) {
     hello: 'Matteo'
   })
 })
-

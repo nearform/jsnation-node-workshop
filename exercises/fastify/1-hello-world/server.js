@@ -7,8 +7,8 @@ app.get('/', {
   schema: {
     querystring: {
       name: {
-        type: "string",
-        default: "world"
+        type: 'string',
+        default: 'world'
       }
     }
   }
