@@ -676,6 +676,128 @@ beforeEach(async function () {
       <li>POST /todo -> insert a single todo item</li>
     </ol>
   </div>
+  <div>
+    Our application code is now <em>messy</em>, all in a <em>single</em> file.
+    Let's <em>split</em> it up!
+  </div>
+  <div>
+    Fastify <em>plugins</em>
+  </div>
+  <div>
+    <pre><code class=javascript>
+fastify.register(
+  require('my-plugin'),
+  { options }
+)
+    </code></pre>
+  </div>
+  <div>
+    <pre><code class=javascript>
+async function myPlugin (fastify, opts) {
+  // register other plugins
+  fastify.register(...)
+
+  // add hooks
+  fastify.addHook(...)
+
+  // add decorator
+  fastify.decorate(...)
+
+  // add routes
+  fastify.route(...)
+}
+
+module.exports = myPlugin
+    </code></pre>
+  </div>
+  <div>
+    <p>
+      Plugins are loaded as a <em>graph</em>
+    </p>
+    <br>
+    <img src="./dag.png" style="width: 50%"></img>
+  </div>
+  <div>
+    <p>
+      <em>Decorators</em> are encapsulated
+    </p>
+    <br>
+    <img src="./dag-decorate.png" style="width: 50%"></img>
+  </div>
+  <div>
+    <pre><code class=javascript>
+const fp = require('fastify-plugin')
+
+async function myPlugin (fastify, options) {
+  fastify.decorate('util', yourAwesomeUtility)
+  // now you can use it with `fastify.util`
+}
+
+module.exports = fp(myPlugin)
+    </code></pre>
+  </div>
+  <div>
+    <p>Breaking out of the <em>encapsulation</em></p>
+    <br>
+    <img src="./dag-fp-encapsulate.png" style="width: 50%"></img>
+  </div>
+  <div>
+    <a href="https://github.com/fastify/fastify-autoload">https://github.com/fastify/fastify-autoload</a>
+  </div>
+  <div>
+    <pre><code class=javascript>
+'use strict'
+
+const Fastify = require('fastify')
+const AutoLoad = require('fastify-autoload')
+
+const fastify = Fastify()
+
+fastify.register(AutoLoad, {
+  dir: path.join(__dirname, 'foo')
+})
+
+fastify.listen(3000)
+    </code></pre>
+  </div>
+  <div>
+    <pre><code class=javascript>
+function build (opts) {
+  const app = fastify(opts)
+
+  app.register(require('fastify-mongodb'), {
+    url: 'mongodb://localhost/workshop'
+  })
+
+  app.register(require('fastify-autoload'), {
+    dir: path.join(__dirname, 'routes')
+  })
+
+  return app
+}
+    </code></pre>
+  </div>
+  <div>
+    Every <em>js</em> file loaded by <em>autoload</em> must be a fastify <em>plugin</em>
+  </div>
+  <div>
+    <em>Exercise</em>: create a routes/ folder, and create two files:
+    <ol>
+      <li>routes/hello.js contains the hello world route</li>
+      <li>routes/todo.js contains all the todo routes</li>
+    </ol>
+  </div>
+  <div>
+    <em>Exercise</em>: create a test/ folder, and split our tests
+    <ol>
+      <li>test/hello.test.js contains the hello world route</li>
+      <li>test/todo.test.js contains all the todo routes</li>
+    </ol>
+    <em>Update</em> package.json accordingly
+  </div>
+  <div class="title">
+    Questions?
+  </div>
   <div class="title">
     <div style="height: 30%" class="bubblegum">
       Thanks
