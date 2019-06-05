@@ -566,6 +566,111 @@ test('hello querystring', async function (t) {
     A <em>microservice</em> is a unit. If it includes a <em>database</em>, that
     <em>must</em> be covered by your unit tests.
   </div>
+  <div>
+    Adding <em>MongoDB</em>
+    <pre><code class='sh'>
+      npm install mongodb
+      npm install fastify-mongodb
+      npm install mongo-clean --save-dev
+    </code></pre>
+  </div>
+  <div>
+    <pre><code class=javascript>
+  app.register(require('fastify-mongodb'), {
+    url: 'mongodb://localhost/workshop'
+  })
+    </code></pre>
+  </div>
+  <div>
+    <em>Clean</em> the <em>database</em> before any test!
+    <pre><code class=javascript>
+const { beforeEach, afterEach, test } = require('tap')
+const clean = require('mongo-clean')
+const build = require('./server')
+
+let server
+
+beforeEach(async function () {
+  server = build()
+  await server.ready()
+  await clean(server.mongo.db)
+})
+    </code></pre>
+  </div>
+  <div>
+    <em>MongoDB</em> documentation
+    <a href="https://mongodb.github.io/node-mongodb-native/">
+      https://mongodb.github.io/node-mongodb-native/
+    </a>
+  </div>
+  <div>
+    Reading from a <em>Collection</em>
+    <pre><code class=javascript>
+  app.get('/something', {
+    // fill it in!
+  }, async (request, reply) => {
+    const coll = app.mongo.db.collection('somethings')
+    const items = await coll.find().toArray()
+    return { somethings }
+  })
+    </code></pre>
+  </div>
+  <div>
+    Inserting into a <em>Collection</em>
+    <pre><code class=javascript>
+  app.post('/something', {
+    // fill it in!
+  }, async (request, reply) => {
+    const coll = app.mongo.db.collection('todos')
+
+    const data = await coll.insertOne(request.body)
+    const _id = data.insertedId
+
+    reply
+      .code(201)
+      .header('location', `/something/${_id}`)
+
+    return Object.assign({
+      _id
+    }, request.body)
+  })
+    </code></pre>
+  </div>
+  <div>
+    <em>Read</em> one element from <em>Collection</em>
+    <pre><code class=javascript>
+  app.get('/something/:id', {
+    schema: {
+      params: S.object()
+        .prop('id', S.string())
+        .valueOf(),
+      response: {
+        200: S.object()
+          .prop('name', S.string())
+          .prop('_id', S.string())
+          .valueOf()
+      }
+  }, async (request, reply) => {
+    const { ObjectId } = app.mongo
+    const coll = app.mongo.db.collection('something')
+    // id is a param in the url! We can validate it as well
+    const item = await coll.findOne({ _id: new ObjectId(request.params.id) })
+    if (item === null) {
+      reply.code(404).send()
+      return
+    }
+    return item
+  })
+    </code></pre>
+  </div>
+  <div>
+    <em>Exercise:</em> write three routes
+    <ol>
+      <li>GET /todo -> returns all the todo items</li>
+      <li>GET /todo/:id -> returns a single todo item</li>
+      <li>POST /todo -> insert a single todo item</li>
+    </ol>
+  </div>
   <div class="title">
     <div style="height: 30%" class="bubblegum">
       Thanks
