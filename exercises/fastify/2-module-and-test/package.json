@@ -1,0 +1,20 @@
+{
+  "name": "hello-world",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "tap -J test.js",
+    "start": "node server.js"
+  },
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^2.4.1",
+    "fluent-schema": "^0.7.2",
+    "make-promises-safe": "^5.0.0"
+  },
+  "devDependencies": {
+    "tap": "^14.2.1"
+  }
+}

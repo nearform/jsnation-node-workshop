@@ -1,0 +1,23 @@
+{
+  "name": "hello-world",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "tap -J test.js",
+    "mongodb": "docker run -p 27017:27017 mongo:4.1.13",
+    "start": "node server.js"
+  },
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^2.4.1",
+    "fastify-mongodb": "^1.0.1",
+    "fluent-schema": "^0.7.2",
+    "make-promises-safe": "^5.0.0"
+  },
+  "devDependencies": {
+    "mongo-clean": "^2.0.0",
+    "tap": "^14.2.1"
+  }
+}
