@@ -716,7 +716,7 @@ beforeEach(async function () {
     // fill it in!
   }, async (request, reply) => {
     const coll = app.mongo.db.collection('somethings')
-    const items = await coll.find().toArray()
+    const somethings = await coll.find().toArray()
     return { somethings }
   })
     </code></pre>
