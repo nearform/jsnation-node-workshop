@@ -68,19 +68,22 @@ $ curl http://localhost:3000
   <div>
       The <em>wrong</em> way to serve a file
       <pre><code class=javascript>
-        const { readFileSync } = require('fs')
-        const { createServer } = require('http')
+const { readFileSync } = require('fs')
+const { createServer } = require('http')
 
-        const server = createServer(
-          (req, res) => {
-            res.end(readFileSync(__filename))
-          }
-        )
+const server = createServer(
+  (req, res) => {
+    res.end(readFileSync(__filename))
+  }
+)
 
-        server.listen(3000)
+server.listen(3000)
       </code></pre>
   </div>
-  <div><code style='position:relative;top:-1em;font-size:.4em;text-align:center'>event loop</code></div>
+  <div>
+    &nbsp;
+    <img src=event-loop-1.png>
+  </div>
   <div>
       streaming a file
       <pre><code class=javascript>
@@ -213,6 +216,10 @@ const emitter = createEmitter()
 emitter.on('data', console.log)
       </code></pre>
   </div>
+  <div>
+    &nbsp;
+    <img src=event-loop-2.png>
+  </div>
   <div style='text-align:center'><code>setImmediate</code> <br><em>vs</em><br> <code>process.nextTick</code></div>
   <div>
       current task vs <code>process.nextTick</code> vs <code>setImmediate</code>
@@ -252,6 +259,10 @@ console.log('3')
       </code></pre>
   </div>
   <div>
+      &nbsp;
+      <img src=event-loop-3.png>
+    </div>
+  <div>
       <u><em>scheduling order</em></u>
       <ol>
         <li>current tick (tasks)</li>
@@ -275,7 +286,7 @@ Promise.resolve().then(() => { throw Error('problems.') })
       </code></pre>
       or even try replacing the first line with:
       <pre><code class=javascript>
-(async () => { throw Error('problems. ') })()
+(async () => { throw Error('problems.') })()
       </code></pre>
   </div>
   <div>
@@ -337,7 +348,6 @@ console.log('3')
         <li>setImmediate <small>(... next tick)</small>    &nbsp;&nbsp;&nbsp;</li>
       </ol>
   </div>
-  <div><em>exercise:</em> async/await</div>
   <div>
       <em>exercise:</em> complete to emit the data
       <pre><code class=javascript>
