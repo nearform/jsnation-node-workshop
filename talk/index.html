@@ -29,9 +29,9 @@
   <div>
     <u><em>setup</em></u>
     <ul>
-      <li>node v10</li>
-      <li>docker</li>
-      <li>mongo db (docker image)</li>
+      <li>Node v10.16.0</li>
+      <li>Docker</li>
+      <li>Docker Image <code>mongo</code> v4.1.13</li>
     </ul>
   </div>
   <div><code style='position:relative;top:-1em;font-size:.4em;text-align:center'>node !== browser</code></div>
@@ -270,12 +270,17 @@
   <div>
       <em> exercise: </em> run the following
       <pre><code class=javascript>
-        require('make-promises-safe')
+        require('make-promises-safe') // Use with Node v10
         Promise.reject(Error('problems.'))
         setImmediate(() => console.log('1'))
         process.nextTick(() => console.log('2'))
         console.log('3')
       </code></pre>
+      From Node v12.0.0, use the <code>--unhandled-rejections=strict</code> flag:
+      <pre><code class=bash>
+        node --unhandled-rejections=strict app.js 
+      </code></pre>
+
   </div>
   <div>async/await <em>is</em> promises</div>
   <div>
