@@ -396,6 +396,65 @@ emitter.on('data', console.log)
     <a href="https://www.fastify.io/">www.fastify.io</a>
   </div>
   <div>
+      creating a fastify server
+      <pre><code class=javascript>
+// Require the framework and instantiate it
+const app = require('fastify')({
+  logger: true
+})
+
+app.get('/', async () => 'hello jsnation')
+
+// Run the server!
+app.listen(3000).catch(console.error)
+      </code></pre>
+      Check with:
+      <pre><code class=bash>
+$ curl http://localhost:3000
+      </code></pre>
+  </div>
+  <div>
+      streaming data 
+      <pre><code class=javascript>
+const { createReadStream } = require('fs')
+const app = require('fastify')({
+  logger: true
+})
+
+app.get('/', async (request, reply) => {
+  reply.type('text/javascript')
+  return createReadStream(__filename)
+})
+
+app.listen(3000).catch(console.error)
+      </code></pre>
+      Check with:
+      <pre><code class=bash>
+$ curl http://localhost:3000
+      </code></pre>
+  </div>
+  <div>
+      serving files
+      <pre><code class=bash>
+$ npm install fastify-static
+</code></pre><pre><code class=javascript>
+const { join } = require('path')
+const serve = require('fastify-static')
+const app = require('fastify')({
+  logger: true
+})
+app.register(serve, {
+  root: join(__dirname, 'public')
+})
+app.listen(3000).catch(console.error)
+      </code></pre>
+      Check with:
+      <pre><code class=bash>
+$ curl http://localhost:3000
+      </code></pre>
+  </div>
+  <div>
+    serving JSON
     <pre><code class="javascript">
 // Require the framework and instantiate it
 const app = require('fastify')({
