@@ -1,3 +1,4 @@
+'use strict'
 // Require the framework and instantiate it
 const app = require('fastify')({
   logger: true
